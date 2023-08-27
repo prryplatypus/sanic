@@ -25,6 +25,9 @@ jobs:
         env:
           TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
+          echo "${{ toJSON(github) }}"
+          exit 1
+
           tag_name="${{ env.TAG_NAME }}"
 
           if [[ ! "${tag_name}" =~ ^v([0-9]{2})\.([0-9]{1,2})\.([0-9]+)$ ]]; then
