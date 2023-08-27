@@ -6,7 +6,7 @@ on:
 
 env:
   IS_TEST: false
-  DOCKER_ORG_NAME: sanicframework
+  DOCKER_ORG_NAME: prryplatypus
   DOCKER_IMAGE_NAME: sanic
   DOCKER_BASE_IMAGE_NAME: sanic-build
   DOCKER_IMAGE_DOCKERFILE: ./docker/Dockerfile
@@ -20,20 +20,6 @@ jobs:
       docker-tags: ${{ steps.generate_docker_info.outputs.tags }}
       pypi-version: ${{ steps.parse_version_tag.outputs.pypi-version }}
     steps:
-      - uses: octokit/request-action@v2.x
-        id: get_latest_release
-        with:
-          route: GET /repos/{owner}/{repo}/releases/latest
-          owner: ${{ github.event.repository.owner.login }}
-          repo: ${{ github.event.repository.name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Output request action data
-        run: |
-          echo "${{ toJson(steps.get_latest_release.outputs) }}"
-          exit 1
-
       - name: Parse version tag
         id: parse_version_tag
         env:
@@ -58,25 +44,21 @@ jobs:
           echo "${month_output}" >> $GITHUB_OUTPUT
           echo "${pypi_output}" >> $GITHUB_OUTPUT
 
-      - name: Get latest release
-        # id: get_latest_release
-        run: |
-          latest_tag=$(
-            curl -L \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer ${{ github.token }}" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              https://api.github.com/repos/${{ github.repository }}/releases/latest \
-              | jq -r '.tag_name'
-          )
-          echo "latest_tag=$latest_tag" >> $GITHUB_OUTPUT
+      - uses: octokit/request-action@v2.x
+        id: get_latest_release
+        with:
+          route: GET /repos/{owner}/{repo}/releases/latest
+          owner: ${{ github.event.repository.owner.login }}
+          repo: ${{ github.event.repository.name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate Docker info
         id: generate_docker_info
         run: |
           tag_year="${{ steps.parse_version_tag.outputs.year }}"
           tag_month="${{ steps.parse_version_tag.outputs.month }}"
-          latest_tag="${{ steps.get_latest_release.outputs.latest_tag }}"
+          latest_tag="${{ steps.get_latest_release.outputs.data.tag_name }}"
           tag="${{ github.event.release.tag_name }}"
 
           tags="${tag_year}.${tag_month}"
