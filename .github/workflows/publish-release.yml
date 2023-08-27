@@ -5,8 +5,8 @@ on:
     types: [created]
 
 env:
-  IS_TEST: false
-  DOCKER_ORG_NAME: prryplatypus
+  IS_TEST: true
+  DOCKER_ORG_NAME: sanicframework
   DOCKER_IMAGE_NAME: sanic
   DOCKER_BASE_IMAGE_NAME: sanic-build
   DOCKER_IMAGE_DOCKERFILE: ./docker/Dockerfile
