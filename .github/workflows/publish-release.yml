@@ -47,9 +47,7 @@ jobs:
       - uses: octokit/request-action@v2.x
         id: get_latest_release
         with:
-          route: GET /repos/{owner}/{repo}/releases/latest
-          owner: ${{ github.event.repository.owner.login }}
-          repo: ${{ github.event.repository.name }}
+          route: GET /repos/${{ github.repository }}/releases/latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -58,7 +56,7 @@ jobs:
         run: |
           tag_year="${{ steps.parse_version_tag.outputs.year }}"
           tag_month="${{ steps.parse_version_tag.outputs.month }}"
-          latest_tag="${{ steps.get_latest_release.outputs.data.tag_name }}"
+          latest_tag="${{ fromJSON(steps.get_latest_release.outputs.data).tag_name }}"
           tag="${{ github.event.release.tag_name }}"
 
           tags="${tag_year}.${tag_month}"
