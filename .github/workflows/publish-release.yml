@@ -20,14 +20,25 @@ jobs:
       docker-tags: ${{ steps.generate_docker_info.outputs.tags }}
       pypi-version: ${{ steps.parse_version_tag.outputs.pypi-version }}
     steps:
+      - uses: octokit/request-action@v2.x
+        id: get_latest_release
+        with:
+          route: GET /repos/{owner}/{repo}/releases/latest
+          owner: ${{ github.event.repository.owner.login }}
+          repo: ${{ github.event.repository.name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Output request action data
+        run: |
+          echo "${{ toJson(steps.get_latest_release.outputs) }}"
+          exit 1
+
       - name: Parse version tag
         id: parse_version_tag
         env:
           TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
-          echo "${{ toJSON(github) }}"
-          exit 1
-
           tag_name="${{ env.TAG_NAME }}"
 
           if [[ ! "${tag_name}" =~ ^v([0-9]{2})\.([0-9]{1,2})\.([0-9]+)$ ]]; then
