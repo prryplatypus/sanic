@@ -59,7 +59,7 @@ jobs:
           echo "${pypi_output}" >> $GITHUB_OUTPUT
 
       - name: Get latest release
-        id: get_latest_release
+        # id: get_latest_release
         run: |
           latest_tag=$(
             curl -L \
