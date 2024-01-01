@@ -17,9 +17,9 @@ jobs:
     name: Generate info
     runs-on: ubuntu-latest
     outputs:
-      is-test: ${{ steps.generate_docker_info.outputs.is-test }}
       docker-tags: ${{ steps.generate_docker_info.outputs.tags }}
       pypi-version: ${{ steps.parse_version_tag.outputs.pypi-version }}
+      is-test: ${{ env.IS_TEST }}
     steps:
       - name: Parse version tag
         id: parse_version_tag
@@ -87,25 +87,16 @@ jobs:
           echo "${tags_output}"
           echo "${tags_output}" >> $GITHUB_OUTPUT
 
-          is_test_output="is-test=${{ env.IS_TEST }}"
-
-          echo "${is_test_output}"
-          echo "${is_test_output}" >> $GITHUB_OUTPUT
-
   publish_docker:
     name: Publish Docker / Python ${{ matrix.python-version }}
     needs: [generate_info]
     runs-on: ubuntu-latest
+    if: ${{ needs.generate_info.outputs.is-test == 'false' }}ª
     strategy:
       fail-fast: true
       matrix:
         python-version: ["3.10", "3.11"]
     steps:
-      - name: Echo needs is test
-        run: |
-          echo "${{ needs.generate_info.is-test }}"
-          exit 1
-
       - name: Checkout repository
         uses: actions/checkout@v3
 
